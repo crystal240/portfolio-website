@@ -1,0 +1,45 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "src": "src/pages/Books.tsx"
+    },
+    {
+      "path": "/book",
+      "src": "src/pages/BookDetail.tsx"
+    },
+    {
+      "path": "/merch",
+      "src": "src/pages/Merch.tsx"
+    },
+    {
+      "path": "/merch-detail",
+      "src": "src/pages/MerchDetail.tsx"
+    },
+    {
+      "path": "/campus-merch-detail",
+      "src": "src/pages/CampusMerchDetail.tsx"
+    },
+    {
+      "path": "/3d",
+      "src": "src/pages/ThreeD.tsx"
+    },
+    {
+      "path": "/aigc",
+      "src": "src/pages/AIGC.tsx"
+    },
+    {
+      "path": "/about",
+      "src": "src/pages/About.tsx"
+    }
+  ],
+  "components": [
+    {"name": "Header", "src": "src/components/Header.tsx"},
+    {"name": "MasonryGrid", "src": "src/components/MasonryGrid.tsx"},
+    {"name": "BookCard", "src": "src/components/BookCard.tsx"},
+    {"name": "MerchCard", "src": "src/components/MerchCard.tsx"},
+    {"name": "ImageGallery", "src": "src/components/ImageGallery.tsx"},
+    {"name": "ProjectInfo", "src": "src/components/ProjectInfo.tsx"},
+    {"name": "ImagePreview", "src": "src/components/ImagePreview.tsx"}
+  ]
+}
