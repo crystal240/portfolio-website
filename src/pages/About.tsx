@@ -32,7 +32,7 @@ const About: React.FC = () => {
   const tools = ['InDesign', 'Illustrator', 'Photoshop', 'Blender', 'AIGC', 'Figma'];
 
   return (
-    <div className="page-transition min-h-screen pt-20 pb-12 flex items-center">
+    <div className="page-transition min-h-screen pt-10 md:pt-20 pb-12 flex items-center">
       <div className="page-container max-w-5xl">
         <div className="grid grid-cols-1 md:grid-cols-[270px_1fr] gap-8 md:gap-10 items-start">
           {/* 左侧头像 - 缩小 */}

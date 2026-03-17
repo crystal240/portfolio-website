@@ -1,12 +1,131 @@
-import React, { useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import MasonryGrid from '@/components/MasonryGrid';
 import ImagePreview from '@/components/ImagePreview';
 import { AIGCProject } from '@/types/portfolio';
 
+type BeforeAfterSliderProps = {
+  beforeSrc: string;
+  afterSrc: string;
+  alt: string;
+  priority?: boolean;
+  className?: string;
+};
+
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+
+const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
+  beforeSrc,
+  afterSrc,
+  alt,
+  priority = false,
+  className = '',
+}) => {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [ratio, setRatio] = useState(0.5); // 0..1
+  const [dragging, setDragging] = useState(false);
+
+  const pct = useMemo(() => Math.round(ratio * 1000) / 10, [ratio]); // 0.0 - 100.0
+  const styleVars = useMemo(() => {
+    return { ['--ba-pct' as `--${string}`]: `${pct}%` } as React.CSSProperties;
+  }, [pct]);
+
+  const updateFromClientX = (clientX: number) => {
+    const el = rootRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const next = clamp01((clientX - rect.left) / rect.width);
+    setRatio(next);
+  };
+
+  return (
+    <div
+      ref={rootRef}
+      className={`relative w-full select-none touch-none overflow-hidden ${className}`}
+      onPointerDown={(e) => {
+        (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+        setDragging(true);
+        updateFromClientX(e.clientX);
+      }}
+      onPointerMove={(e) => {
+        if (!dragging) return;
+        updateFromClientX(e.clientX);
+      }}
+      onPointerUp={() => setDragging(false)}
+      onPointerCancel={() => setDragging(false)}
+      role="group"
+      aria-label={`${alt} before after comparison`}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          setRatio((r) => clamp01(r - 0.02));
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          setRatio((r) => clamp01(r + 0.02));
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          setRatio(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          setRatio(1);
+        }
+      }}
+      style={styleVars}
+    >
+      {/* before */}
+      <img
+        src={beforeSrc}
+        alt={`${alt} - AI素材`}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'auto'}
+        decoding="async"
+        className="w-full h-auto object-contain block"
+        draggable={false}
+      />
+
+      {/* after */}
+      <div
+        className="absolute inset-0"
+        style={{
+          clipPath: `inset(0 ${100 - pct}% 0 0)`,
+        }}
+        aria-hidden="true"
+      >
+        <img
+          src={afterSrc}
+          alt={`${alt} - 海报应用`}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-full object-contain block"
+          draggable={false}
+        />
+      </div>
+
+      {/* handle */}
+      <div
+        className="absolute top-0 bottom-0"
+        style={{ left: `calc(var(--ba-pct) - 1px)` }}
+        aria-hidden="true"
+      >
+        <div className="h-full w-[2px] bg-[#00B4DE]/80 shadow-[0_0_0_1px_rgba(0,0,0,0.15)]" />
+
+        {/* draggable knob (visual only; dragging is handled by pointer events on root) */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 -left-6 h-10 w-12 rounded-full bg-[#00B4DE] shadow-lg border border-white/40 flex items-center justify-center"
+          style={{ cursor: dragging ? 'grabbing' : 'grab' }}
+        >
+          <div className="flex items-center gap-2 text-[11px] font-semibold text-white">
+            <span aria-hidden="true">←</span>
+            <span aria-hidden="true">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AIGC: React.FC = () => {
   console.log('AIGC page rendered');
-
-  const [hoveredApp, setHoveredApp] = useState<string | null>(null);
 
   const applicationProjects = [
     {
@@ -77,7 +196,7 @@ const AIGC: React.FC = () => {
   ];
 
   return (
-    <div className="page-transition min-h-screen pt-24 pb-16">
+    <div className="page-transition min-h-screen pt-10 md:pt-24 pb-16">
       <div className="page-container">
         <div className="mb-12">
           <h1 className="editorial-heading text-6xl mb-4 vintage-text">AIGC</h1>
@@ -97,47 +216,18 @@ const AIGC: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {applicationProjects.map((project, index) => {
-              const isHovered = hoveredApp === project.id;
-              const displayImage = isHovered ? project.posterImage : project.designImage;
-
               return (
                 <div
                   key={project.id}
                   className="group relative overflow-hidden bg-muted retro-border border-2 border-border w-fit max-w-full"
-                  onMouseEnter={() => setHoveredApp(project.id)}
-                  onMouseLeave={() => setHoveredApp(null)}
                 >
-                  <img
-                    src={displayImage}
+                  <BeforeAfterSlider
+                    beforeSrc={project.designImage}
+                    afterSrc={project.posterImage}
                     alt={project.title}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    fetchPriority={index === 0 ? 'high' : 'auto'}
-                    decoding="async"
-                    className="w-full h-auto object-cover transition-all duration-500 block"
+                    priority={index === 0}
+                    className="w-full h-auto"
                   />
-                  <div
-                    className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-all duration-500 cursor-pointer"
-                    onClick={() => {
-                      const previewImg = document.createElement('img');
-                      previewImg.src = project.posterImage;
-                      previewImg.alt = project.title;
-                      previewImg.className = 'max-w-full max-h-[90vh] object-contain';
-                      
-                      const overlay = document.createElement('div');
-                      overlay.className = 'fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4';
-                      overlay.onclick = () => overlay.remove();
-                      
-                      const closeBtn = document.createElement('button');
-                      closeBtn.innerHTML = '×';
-                      closeBtn.className = 'absolute top-4 right-4 text-white text-4xl w-12 h-12 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors';
-                      closeBtn.onclick = () => overlay.remove();
-                      
-                      overlay.appendChild(previewImg);
-                      overlay.appendChild(closeBtn);
-                      document.body.appendChild(overlay);
-                    }}
-                  >
-                  </div>
                 </div>
               );
             })}

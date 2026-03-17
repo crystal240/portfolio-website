@@ -40,7 +40,7 @@ const MerchDetail: React.FC = () => {
     const mainImageCols = displayItem.mainImageColumns ?? 2;
 
   return (
-    <div className="page-transition min-h-screen pt-24 pb-16">
+    <div className="page-transition min-h-screen pt-10 md:pt-24 pb-16">
       <div className="page-container">
         <div className="text-center mb-10">
           <h1 className="editorial-heading text-4xl md:text-5xl mb-2 vintage-text">

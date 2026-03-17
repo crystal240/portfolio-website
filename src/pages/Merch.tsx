@@ -126,15 +126,21 @@ const Merch: React.FC = () => {
       designImage: 'https://img.crystaljupiter.com/merch/campus/design/7.jpg',
       productImage: 'https://img.crystaljupiter.com/merch/campus/product/7.jpg',
       title: 'Campus Cap'
+    },
+    {
+      id: 'item8',
+      designImage: 'https://img.crystaljupiter.com/merch/campus/design/8.jpg',
+      productImage: 'https://img.crystaljupiter.com/merch/campus/product/8.jpg',
+      title: 'Campus Cap'
     }
   ];
 
   const campusMerchItem: MerchItem = {
     id: 'campus-1',
-    title: 'Campus Merchandise Collection',
+    title: '校园文创 · Campus Merch Collection',
     category: '校园文创',
     thumbnail: 'https://img.crystaljupiter.com/merch/campus/campuscollection.jpg',
-    description: 'University merchandise collection featuring apparel, stationery, and accessories.',
+    description: '帆布包、文具及明信片等校园文创周边设计\n\nUniversity merchandise collection featuring bag, stationery, and postcards.',
     campusItems: campusItems
   };
 
@@ -149,7 +155,7 @@ const Merch: React.FC = () => {
   };
 
   return (
-    <div className="page-transition min-h-screen pt-24 pb-16">
+    <div className="page-transition min-h-screen pt-10 md:pt-24 pb-16">
       <div className="page-container">
         <div className="mb-12">
           <h1 className="editorial-heading text-6xl mb-4 vintage-text">Merch</h1>
@@ -195,7 +201,7 @@ const Merch: React.FC = () => {
               />
             </div>
             <p className="text-muted-foreground mt-4 text-sm">
-              校园文创，涵盖服帆布包、文具及明信片
+              校园文创，涵盖帆布包、文具及明信片
               <br />
               University merchandise collection featuring bag, stationery, and postcards.
             </p>

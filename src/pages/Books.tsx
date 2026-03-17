@@ -216,7 +216,7 @@ const Books: React.FC = () => {
   };
 
   return (
-    <div className="page-transition min-h-screen pt-24 pb-16">
+    <div className="page-transition min-h-screen pt-10 md:pt-24 pb-16">
       <div className="page-container">
         <div className="mb-12">
           <h1 className="editorial-heading text-6xl mb-4">Books</h1>

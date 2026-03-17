@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { MerchItem, CampusMerchItem } from '@/types/portfolio';
 import MasonryGrid from '@/components/MasonryGrid';
-import ImagePreview from '@/components/ImagePreview';
 
 const CampusMerchDetail: React.FC = () => {
   const location = useLocation();
   const item = location.state?.item as MerchItem | undefined;
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [toggledItemIds, setToggledItemIds] = useState<Set<string>>(() => new Set());
+  const [hoverCapable, setHoverCapable] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+    return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  });
 
   console.log('CampusMerchDetail page rendered', item?.title);
 
@@ -61,13 +65,40 @@ const CampusMerchDetail: React.FC = () => {
 
   const campusItems = displayItem.campusItems || defaultCampusItems;
 
+  useEffect(() => {
+    // If device supports hover + fine pointer, we treat it as "desktop-like".
+    // Otherwise (touch devices) we disable hover logic and use click toggle only.
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+
+    const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const update = (e: MediaQueryListEvent) => setHoverCapable(e.matches);
+
+    // Safari < 14 uses addListener/removeListener
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', update);
+      return () => mq.removeEventListener('change', update);
+    }
+
+    mq.addListener(update);
+    return () => mq.removeListener(update);
+  }, []);
+
+  const toggleItem = (id: string) => {
+    setToggledItemIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   return (
-    <div className="page-transition min-h-screen pt-24 pb-16">
+    <div className="page-transition min-h-screen pt-10 md:pt-24 pb-16">
       <div className="page-container">
         <div className="text-center mb-16">
           <h1 className="editorial-heading text-6xl mb-4 vintage-text">{displayItem.title}</h1>
           {displayItem.description && (
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto mt-4">
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto mt-4 leading-tight whitespace-pre-line">
               {displayItem.description}
             </p>
           )}
@@ -76,24 +107,34 @@ const CampusMerchDetail: React.FC = () => {
         <MasonryGrid columns={3}>
           {campusItems.map((campusItem, index) => {
             const hasProductImage = Boolean(campusItem.productImage);
-            const isHovered = hoveredItemId === campusItem.id && hasProductImage;
-            const displayImage =
-              isHovered && hasProductImage ? campusItem.productImage : campusItem.designImage;
-            const currentLabel = isHovered && hasProductImage ? 'Product' : 'Design';
+            const isHovered = hoverCapable && hoveredItemId === campusItem.id && hasProductImage;
+            const isToggled = hasProductImage && toggledItemIds.has(campusItem.id);
+            const showProduct = hasProductImage && (isHovered || isToggled);
+            const currentLabel = showProduct ? 'Product' : 'Design';
 
-            const handleMouseEnter = hasProductImage
-              ? () => setHoveredItemId(campusItem.id)
-              : undefined;
-            const handleMouseLeave = hasProductImage
-              ? () => setHoveredItemId(null)
-              : undefined;
+            const handleMouseEnter =
+              hoverCapable && hasProductImage ? () => setHoveredItemId(campusItem.id) : undefined;
+            const handleMouseLeave =
+              hoverCapable && hasProductImage ? () => setHoveredItemId(null) : undefined;
+
+            const handleClick = hasProductImage ? () => toggleItem(campusItem.id) : undefined;
 
             return (
               <div
                 key={campusItem.id}
-                className="masonry-item"
+                className={hasProductImage ? 'masonry-item cursor-pointer' : 'masonry-item'}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
+                onClick={handleClick}
+                role={hasProductImage ? 'button' : undefined}
+                tabIndex={hasProductImage ? 0 : undefined}
+                onKeyDown={
+                  hasProductImage
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') toggleItem(campusItem.id);
+                      }
+                    : undefined
+                }
               >
                 <div className="relative overflow-hidden bg-muted border-4 retro-border border-border w-fit max-w-full">
                   <span
@@ -101,12 +142,31 @@ const CampusMerchDetail: React.FC = () => {
                   >
                     {currentLabel}
                   </span>
-                  <ImagePreview
-                    src={displayImage}
-                    alt={campusItem.title}
-                    priority={index === 0}
-                    className="w-full h-auto transition-all duration-500 block"
-                  />
+
+                  {/* Crossfade between Design/Product images */}
+                  <div className="relative">
+                    <img
+                      src={campusItem.designImage}
+                      alt={`${campusItem.title} - Design`}
+                      className={`w-full h-auto block transition-opacity duration-500 ${
+                        showProduct ? 'opacity-0' : 'opacity-100'
+                      }`}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      fetchPriority={index === 0 ? 'high' : 'auto'}
+                    />
+                    {hasProductImage && (
+                      <img
+                        src={campusItem.productImage}
+                        alt={`${campusItem.title} - Product`}
+                        className={`absolute inset-0 w-full h-full object-cover block transition-opacity duration-500 ${
+                          showProduct ? 'opacity-100' : 'opacity-0'
+                        }`}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             );

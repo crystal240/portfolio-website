@@ -71,7 +71,7 @@ const BookDetail: React.FC = () => {
   const mockupColumns = (mockupCount === 3 ? 3 : Math.max(1, Math.min(4, Math.ceil(Math.sqrt(mockupCount))))) as 1 | 2 | 3 | 4;
 
   return (
-    <div className="page-transition min-h-screen pt-24 pb-16">
+    <div className="page-transition min-h-screen pt-10 md:pt-24 pb-16">
       <div className="page-container">
         <div className="text-center mb-10">
           {/* 标题缩小一些，让首屏能容纳更多图片内容 */}
