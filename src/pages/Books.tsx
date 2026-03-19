@@ -192,7 +192,7 @@ const Books: React.FC = () => {
       ],
       size: '190 × 250 mm',
       pages: 144,
-      description: '退伍老兵合编而成，以战争时期的回忆、战后对社会主义事业的建设工作和退休后对生活的追求三个阶段作为系列成书\n\n●\u00A0\u00A0封面以长城为主视觉元素，采用深蓝色为主色调，强化书籍整体整体风格与视觉识别\u00A0\u00A0●\u00A0\u00A0内页采用铜版纸印刷',
+      description: '退伍老兵合编而成，以战争时期的回忆、战后对社会主义事业的建设工作和退休后对生活的追求三个阶段作为系列成书\n\n●\u00A0\u00A0封面以长城为主视觉元素，采用深蓝色为主色调，强化书籍整体风格与视觉识别\u00A0\u00A0●\u00A0\u00A0内页采用铜版纸印刷',
       interiorSpreads: [
         'https://img.crystaljupiter.com/books/junhun/interior (1).png',
         'https://img.crystaljupiter.com/books/junhun/interior (2).png',

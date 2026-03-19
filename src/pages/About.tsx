@@ -14,7 +14,7 @@ const About: React.FC = () => {
 
   const handleDownloadPortfolio = () => {
     const link = document.createElement('a');
-    link.href = '/portfolio.pdf';
+    link.href = 'https://img.crystaljupiter.com/about/documents/jingjing-wan-portfolio-2026.pdf';
     link.download = 'Portfolio.pdf';
     document.body.appendChild(link);
     link.click();
